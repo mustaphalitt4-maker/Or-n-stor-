@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORÁN STORE</title>
+<style>
+:root{--bg:#101010;--panel:#1b1b1b;--gold:#d6b56c;--muted:#aaa;--white:#f7f5ef}
+*{box-sizing:border-box}body{margin:0;background:#f4f2ed;color:#222;font-family:Arial,Tahoma,sans-serif}
+header{background:var(--bg);color:white;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{font-size:26px;font-weight:900;letter-spacing:1px;color:var(--gold)}.tag{font-size:12px;color:#ddd}
+button,.btn{border:0;border-radius:9px;padding:11px 15px;background:var(--gold);color:#171717;font-weight:bold;cursor:pointer}
+button.secondary{background:#333;color:white}button.danger{background:#a93226;color:white}
+nav{background:#222;padding:10px 5%;display:flex;gap:9px;overflow:auto}nav button{white-space:nowrap;background:transparent;color:#eee;border:1px solid #555}
+.hero{background:linear-gradient(110deg,#101010,#35302a);color:white;padding:42px 6%;text-align:center}.hero h1{font-size:34px;margin:0 0 10px;color:var(--gold)}.hero p{color:#ddd}
+.wrap{max-width:1150px;margin:25px auto;padding:0 16px}.tools{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.tools input,.tools select,input,textarea,select{padding:11px;border:1px solid #ccc;border-radius:8px;font:inherit;min-width:0}
+.tools input{flex:1;min-width:180px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.card{background:white;border-radius:13px;overflow:hidden;box-shadow:0 3px 15px #00000012}.photo{height:165px;background:#e9e6df;display:flex;align-items:center;justify-content:center;color:#888;font-size:44px}.cardbody{padding:14px}.card h3{margin:0 0 8px}.price{font-weight:bold;color:#8a6725;font-size:19px}.muted{color:#777;font-size:13px}.card button{width:100%;margin-top:10px}
+section.panel{background:white;border-radius:14px;padding:18px;margin:20px 0;box-shadow:0 3px 15px #00000010}
+.hidden{display:none!important}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.field{display:grid;gap:6px;margin:10px 0}.field input,.field textarea,.field select{width:100%}
+footer{background:#111;color:#ddd;text-align:center;padding:25px;margin-top:45px}.notice{background:#fff4d8;padding:12px;border-radius:9px;color:#6b511a;font-size:13px;line-height:1.7}
+table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:right}
+@media(max-width:600px){.hero h1{font-size:27px}header{padding:14px}.logo{font-size:22px}}
+</style></head>
+<body>
+<header><div><div class="logo">ORÁN STORE</div><div class="tag">كل ما تحتاجه في مكان واحد</div></div><div class="row" style="flex:0 0 auto"><button class="secondary" onclick="showCart()">🛒 السلة <span id="cartCount">0</span></button><button onclick="adminLogin()">لوحة الإدارة</button></div></header>
+<nav id="categories"><button onclick="filterCat('الكل')">كل المنتجات</button><button onclick="filterCat('الهدايا')">الهدايا</button><button onclick="filterCat('الصوتيات')">مكبرات الصوت</button><button onclick="filterCat('الإلكترونيات')">الإلكترونيات</button><button onclick="filterCat('المنزل والديكور')">المنزل والديكور</button><button onclick="filterCat('الإكسسوارات')">الإكسسوارات</button><button onclick="filterCat('أخرى')">أخرى</button></nav>
+<div class="hero"><h1>تسوّق بسهولة مع ORÁN STORE</h1><p>منتجات متنوعة • أسعار بالدينار الجزائري • الطلب والدفع عند الاستلام</p><button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">اكتشف المنتجات</button></div>
+<main class="wrap">
+<div class="tools"><input id="search" placeholder="ابحث عن منتج..." oninput="render()"><select id="sort" onchange="render()"><option value="new">الأحدث</option><option value="low">السعر: الأقل أولاً</option><option value="high">السعر: الأعلى أولاً</option></select></div>
+<h2 id="products">منتجاتنا</h2><div class="grid" id="productGrid"></div>
+<section id="cartPanel" class="panel hidden"><h2>سلة المشتريات</h2><div id="cartItems"></div><h3 id="cartTotal"></h3><button onclick="checkout()">إتمام الطلب</button><button class="secondary" onclick="hidePanels()">متابعة التسوق</button></section>
+<section id="checkoutPanel" class="panel hidden"><h2>معلومات التوصيل والطلب</h2><div class="notice">عند تأكيد الطلب ستفتح واتساب برسالة جاهزة بتفاصيل طلبك لإرسالها إلى ORÁN STORE.</div>
+<div class="field"><label>الاسم الكامل</label><input id="custName"></div><div class="field"><label>رقم الهاتف</label><input id="custPhone" type="tel"></div>
+<div class="row"><div class="field"><label>الولاية</label><select id="wilaya"><option value="">اختر الولاية</option></select></div><div class="field"><label>البلدية</label><input id="commune" placeholder="اسم البلدية"></div></div>
+<div class="field"><label>العنوان بالتفصيل</label><textarea id="address"></textarea></div><p>طريقة الدفع: الدفع عند الاستلام</p><button onclick="placeOrder()">إرسال الطلب عبر واتساب</button></section>
+<section id="adminPanel" class="panel hidden"><h2>لوحة إدارة ORÁN STORE</h2><div class="notice">هذه نسخة أولية محلية: كلمة المرور الافتراضية demo123. المنتجات والطلبات محفوظة في هذا المتصفح فقط، وليست لوحة إدارة آمنة أو مشتركة بعد.</div>
+<h3>إضافة منتج</h3><div class="row"><div class="field"><label>اسم المنتج</label><input id="pName"></div><div class="field"><label>السعر (دج)</label><input id="pPrice" type="number" min="0"></div></div>
+<div class="row"><div class="field"><label>القسم</label><select id="pCat"><option>الهدايا</option><option>الصوتيات</option><option>الإلكترونيات</option><option>المنزل والديكور</option><option>الإكسسوارات</option><option>أخرى</option></select></div><div class="field"><label>رابط صورة المنتج (اختياري)</label><input id="pImage" placeholder="https://..."></div></div>
+<div class="field"><label>وصف المنتج</label><textarea id="pDesc"></textarea></div><button onclick="addProduct()">حفظ المنتج</button>
+<h3>المنتجات الحالية</h3><div id="adminProducts"></div><h3>الطلبات المسجلة على هذا الجهاز</h3><div id="orders"></div>
+</section>
+</main><footer><b style="color:#d6b56c">ORÁN STORE</b><p>متجر إلكتروني متعدد المنتجات في الجزائر</p></footer>
+<script>
+const seed=[
+{id:1,name:"مكبر صوت بلوتوث",price:4500,cat:"الصوتيات",desc:"أضف تفاصيل المنتج والسعر الحقيقي من لوحة الإدارة.",image:"",emoji:"🔊"},
+{id:2,name:"علبة هدية",price:1800,cat:"الهدايا",desc:"هدية جميلة للمناسبات.",image:"",emoji:"🎁"},
+{id:3,name:"إكسسوارات متنوعة",price:1200,cat:"الإكسسوارات",desc:"منتجات متنوعة.",image:"",emoji:"✨"}
+];
+let products=JSON.parse(localStorage.getItem("os_products")||"null")||seed;
+let cart=JSON.parse(localStorage.getItem("os_cart")||"[]");
+let savedOrders=JSON.parse(localStorage.getItem("os_orders")||"[]");
+let activeCat="الكل";
+const wilayas=["أدرار","الشلف","الأغواط","أم البواقي","باتنة","بجاية","بسكرة","بشار","البليدة","البويرة","تمنراست","تبسة","تلمسان","تيارت","تيزي وزو","الجزائر","الجلفة","جيجل","سطيف","سعيدة","سكيكدة","سيدي بلعباس","عنابة","قالمة","قسنطينة","المدية","مستغانم","المسيلة","معسكر","ورقلة","وهران","البيض","إليزي","برج بوعريريج","بومرداس","الطارف","تندوف","تيسمسيلت","الوادي","خنشلة","سوق أهراس","تيبازة","ميلة","عين الدفلى","النعامة","عين تموشنت","غرداية","غليزان","تيميمون","برج باجي مختار","أولاد جلال","بني عباس","عين صالح","عين قزام","تقرت","جانت","المغير","المنيعة"];
+wilayas.forEach(w=>wilaya.add(new Option(w,w)));
+function save(){localStorage.setItem("os_products",JSON.stringify(products));localStorage.setItem("os_cart",JSON.stringify(cart));localStorage.setItem("os_orders",JSON.stringify(savedOrders))}
+function money(n){return Number(n).toLocaleString("fr-DZ")+" دج"}
+function render(){let q=search.value.trim().toLowerCase(),list=products.filter(p=>(activeCat==="الكل"||p.cat===activeCat)&&(`${p.name} ${p.desc} ${p.cat}`).toLowerCase().includes(q));if(sort.value==="low")list.sort((a,b)=>a.price-b.price);if(sort.value==="high")list.sort((a,b)=>b.price-a.price);
+productGrid.innerHTML=list.map(p=>`<article class="card"><div class="photo">${p.image?`<img src="${esc(p.image)}" style="width:100%;height:100%;object-fit:cover">`:p.emoji||"🛍️"}</div><div class="cardbody"><h3>${esc(p.name)}</h3><p class="muted">${esc(p.cat)}</p><p>${esc(p.desc||"")}</p><div class="price">${money(p.price)}</div><button onclick="addCart(${p.id})">أضف إلى السلة</button></div></article>`).join("")||"<p>لا توجد منتجات في هذا القسم.</p>";cartCount.textContent=cart.reduce((s,x)=>s+x.qty,0);renderAdmin()}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function filterCat(c){activeCat=c;render()}
+function addCart(id){let x=cart.find(x=>x.id===id);x?x.qty++:cart.push({id,qty:1});save();render();alert("تمت إضافة المنتج إلى السلة")}
+function showCart(){hidePanels();cartPanel.classList.remove("hidden");cartItems.innerHTML=cart.map(x=>{let p=products.find(p=>p.id===x.id);return p?`<p>${esc(p.name)} × ${x.qty} — ${money(p.price*x.qty)} <button class="danger" onclick="removeCart(${x.id})">حذف</button></p>`:""}).join("")||"السلة فارغة";let subtotal=cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0);cartTotal.innerHTML="مجموع المنتجات: "+money(subtotal)+"<br>سعر التوصيل: "+money(600)+"<br><b>الإجمالي مع التوصيل: "+money(subtotal+600)+"</b>"}
+function removeCart(id){cart=cart.filter(x=>x.id!==id);save();showCart();render()}
+function hidePanels(){["cartPanel","checkoutPanel","adminPanel"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden")})}
+function checkout(){if(!cart.length)return alert("السلة فارغة");cartPanel.classList.add("hidden");checkoutPanel.classList.remove("hidden")}
+function placeOrder(){
+let name=custName.value.trim(),phone=custPhone.value.trim(),w=wilaya.value;
+if(!name||!phone||!w)return alert("يرجى ملء الاسم والهاتف والولاية");
+if(!cart.length)return alert("السلة فارغة");
+let items=cart.map(x=>({...x}));
+let subtotal=cart.reduce((s,x)=>s+(products.find(p=>p.id===x.id)?.price||0)*x.qty,0);\nlet delivery=600;\nlet total=subtotal+delivery;
+let order={date:new Date().toLocaleString(),name,phone,w,commune:commune.value.trim(),address:address.value.trim(),items,subtotal,delivery,total};
+savedOrders.push(order);save();
+let details=items.map(x=>{let p=products.find(p=>p.id===x.id);return "• "+(p?p.name:"منتج")+" × "+x.qty+" — "+money((p?.price||0)*x.qty)}).join("\\n");
+let message="طلب جديد من ORÁN STORE\\n"+
+"الاسم: "+name+"\\n"+
+"هاتف الزبون: "+phone+"\\n"+
+"الولاية: "+w+"\\n"+
+"البلدية: "+(order.commune||"غير محددة")+"\\n"+
+"العنوان: "+(order.address||"غير محدد")+"\\n"+
+"المنتجات:\\n"+details+"\\n"+
+"مجموع المنتجات: "+money(subtotal)+"\\n"+\n"سعر التوصيل: "+money(delivery)+"\\n"+\n"الإجمالي مع التوصيل: "+money(total)+"\\n"+
+"طريقة الدفع: عند الاستلام";
+let whatsappUrl="https://wa.me/213771088169?text="+encodeURIComponent(message);
+window.open(whatsappUrl,"_blank");
+alert("تم تجهيز طلبك. اضغط إرسال داخل واتساب حتى يصل إلى المتجر.");
+cart=[];save();hidePanels();render();
+}
+function adminLogin(){let pass=prompt("كلمة مرور العرض التجريبي (demo123):");if(pass!=="demo123")return alert("كلمة المرور غير صحيحة");hidePanels();const panel=document.getElementById("adminPanel");if(!panel){alert("تعذر العثور على لوحة الإدارة");return}panel.classList.remove("hidden");panel.scrollIntoView({behavior:"smooth",block:"start"});renderAdmin()}
+function addProduct(){let name=pName.value.trim(),price=Number(pPrice.value);if(!name||!price||price<0)return alert("أدخل اسم المنتج والسعر");products.unshift({id:Date.now(),name,price,cat:pCat.value,image:pImage.value.trim(),desc:pDesc.value.trim(),emoji:"🛍️"});save();pName.value=pPrice.value=pImage.value=pDesc.value="";render()}
+function delProduct(id){if(confirm("حذف هذا المنتج؟")){products=products.filter(p=>p.id!==id);save();render()}}
+function renderAdmin(){const adminProductsEl=document.getElementById("adminProducts");if(!adminProductsEl)return;adminProductsEl.innerHTML=products.map(p=>`<p>${esc(p.name)} — ${money(p.price)} <button class="danger" onclick="delProduct(${p.id})">حذف</button></p>`).join("");const ordersDiv=savedOrders.map(o=>`<tr><td>${esc(o.name)}</td><td>${esc(o.phone)}</td><td>${esc(o.w)}</td><td>${money(o.total)}</td><td>${esc(o.date)}</td></tr>`).join("");document.getElementById("orders").innerHTML=ordersDiv?`<table><tr><th>الاسم</th><th>الهاتف</th><th>الولاية</th><th>المجموع</th><th>التاريخ</th></tr>${ordersDiv}</table>`:"لا توجد طلبات بعد"}
+render();
+</script></body></html>
